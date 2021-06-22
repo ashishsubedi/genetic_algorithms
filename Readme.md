@@ -1,1 +1,3 @@
-Created automatically using create-github
+### Knapsack Genetic Solution
+
+Solving knapsack problem using genetic algorithm

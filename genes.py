@@ -1,6 +1,6 @@
 from collections import namedtuple
 from random import choices, randint, random, randrange
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Dict
 from functools import partial
 
 Genome = List[int]  # for eg: [0,1,1,0,1,1,0]
@@ -77,7 +77,12 @@ def run_evolution(
     crossover_func: CrossoverFunc = single_point_crossover,
     mutation_func: MutationFunc = mutation,
     generation_limit: int = 100
-) -> Tuple[Population,int]:
+) -> Tuple[Population,int,Dict]:
+
+    #Fitness_limit: Known max/optimal fitness value for the problem.
+    # If unknows, use arbitary high number 
+    # which is acceptable as high fitness value
+
 
     
     # Make sure initial population has fitness > 0
@@ -89,13 +94,14 @@ def run_evolution(
         if init_fitness > 0:
             break
     
-
-
+    log_best_fitness :Dict[int,int] = {}
+ 
 
     for i in range(generation_limit):
         population.sort(reverse=True,key=lambda genome:fitness_func(genome))
 
-        print(f'Best Fitness in generation {i} -> {fitness_func(population[0])}')
+        # print(f'Best Fitness in generation {i} -> {fitness_func(population[0])}')
+        log_best_fitness[i] = fitness_func(population[0])
 
         if fitness_func(population[0]) >= fitness_limit:
             break
@@ -113,10 +119,10 @@ def run_evolution(
     
     population.sort(reverse=True,key=lambda genome:fitness_func(genome))
 
-    return population, i
+    return population, i, log_best_fitness
 
 
-def genome_to_things(genome:Genome, thing: [Thing])-> [Thing]:
+def genome_to_things(genome:Genome, things: [Thing])-> [Thing]:
     result = []
 
     for i, thing in enumerate(things):
@@ -124,6 +130,7 @@ def genome_to_things(genome:Genome, thing: [Thing])-> [Thing]:
             result += [thing.name]
 
     return result
+
 
 
 if __name__ == '__main__':
@@ -140,7 +147,7 @@ if __name__ == '__main__':
     ]
 
 
-    population, generations = run_evolution(
+    population, generations, best_fitnesses = run_evolution(
         populate_func= partial(
             generate_population,size=10,genome_length = len(things)
         ),

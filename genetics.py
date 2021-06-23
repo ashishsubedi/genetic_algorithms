@@ -1,13 +1,14 @@
 from collections import namedtuple
 from collections.abc import Callable
 from functools import partial
+from itertools import accumulate
 from random import choice, choices, randint, random, randrange
 from typing import Dict, List, Optional, Tuple
 
 import genes
 from genes import FitnessFunc, mutation, run_evolution
 
-Genes = '''abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'''
+Genes = '''abcdefghijklmnopqrstuvwxyz '''
 
 Genome = List[str]
 FitnessFunc = Callable[[Genome], int]
@@ -42,49 +43,58 @@ class Organism:
         self.fitness_value = self._fitness_func(self.genome)
         return self.fitness_value
 
-    def crossover(self, b: 'Organism') -> Tuple['Organism', 'Organism']:
-
-        if len(self.genome) != len(b):
-            raise ValueError("Genomes a and b must be of same length.")
-        child_1_genome = []
-        child_2_genome = []
-        for gp1, gp2 in zip(self.genome, b.genome): 
-            # random probability
-            prob = random()
-
-            if prob < 0.5:
-                child_1_genome.append(gp1)
-                child_2_genome.append(gp2)
-
-            else:
-                child_1_genome.append(gp2)
-                child_2_genome.append(gp1)
-        
-        
-        self.genome = child_1_genome
-        b.genome = child_2_genome
-
-        return self,b
-
-        
-
     # def crossover(self, b: 'Organism') -> Tuple['Organism', 'Organism']:
+
     #     if len(self.genome) != len(b):
     #         raise ValueError("Genomes a and b must be of same length.")
+    #     child_1_genome = []
+    #     child_2_genome = []
+    #     for gp1, gp2 in zip(self.genome, b.genome): 
+    #         # random probability
+    #         prob = random()
 
-    #     length = len(b)
-    #     if length < 2:
-    #         return (self, b)
+    #         if prob < 0.5:
+    #             child_1_genome.append(gp1)
+    #             child_2_genome.append(gp2)
 
-    #     p = randint(1, length-1)
+    #         else:
+    #             child_1_genome.append(gp2)
+    #             child_2_genome.append(gp1)
+        
+        
+    #     # self.genome = child_1_genome
+    #     # b.genome = child_2_genome
 
-    #     temp_a_genome = self.genome
-    #     self.genome = self.genome[:p] + b.genome[p:]
-    #     b.genome = b.genome[:p]+temp_a_genome[p:]
+    #     # self.calculate_fitness()
+    #     # b.calculate_fitness()
+    #     new_a = Organism(len(b),self._fitness_func).change_organism_genome(child_1_genome)
+    #     new_b = Organism(len(b),self._fitness_func).change_organism_genome(child_2_genome)
 
-    #     return self, b
 
-    def mutation(self, num: int = 1, probability: float = 0.3) -> None:
+    #     return new_a,new_b
+
+        
+
+    def crossover(self, b: 'Organism') -> Tuple['Organism', 'Organism']:
+        if len(self.genome) != len(b):
+            raise ValueError("Genomes a and b must be of same length.")
+
+        length = len(b)
+        if length < 2:
+            return (self, b)
+
+        p = randint(1, length-1)
+
+        # temp_a_genome = self.genome
+        # self.genome = self.genome[:p] + b.genome[p:]
+        # b.genome = b.genome[:p]+temp_a_genome[p:]
+
+        new_a = Organism(length,self._fitness_func).change_organism_genome(self.genome[:p] + b.genome[p:])
+        new_b = Organism(length,self._fitness_func).change_organism_genome(b.genome[:p]+self.genome[p:])
+
+        return new_a, new_b
+
+    def mutation(self, num: int = 2, probability: float = 0.3) -> None:
         for _ in range(num):
             index = randrange(len(self.genome))
             self.genome[index] = self.genome[index] if random(
@@ -102,6 +112,7 @@ class Population:
         self.fitness_func = fitness_func
         self.high_fitness_best = high_fitness_best
         self.size = size
+        self.probability_dist = []
 
         while True:
             self.population = self.generate_population(
@@ -124,19 +135,19 @@ class Population:
         '''
 
         pop = self.population
-        # return choices(
-        #     population=pop,
-        #     weights=[organism.fitness_value
-        #             for organism in pop],
-        #     k=2
-        # )
+        return choices(
+            population=pop,
+            cum_weights=self.probability_dist,
+            k=2
+        )
 
-        return choices(pop, k=2)
+        # return choices(pop, k=2)
 
     def get_best_organisms(self) -> List[Organism]:
 
         self.population.sort(
             reverse=self.high_fitness_best, key=lambda organism: organism.calculate_fitness())
+
         return self.population
 
     def run_evolution(
@@ -152,12 +163,22 @@ class Population:
         # In case the fitness function is best if lower value,
         #  negate the Fitness_limit value
 
+        for _ in range(self.size//3):
+            self.probability_dist.append(randint(30,50))
+
+        for _ in range((self.size - self.size//3)+3):
+            self.probability_dist.append(randint(5,15))
+
+        self.probability_dist = self.probability_dist[:self.size]
+        self.probability_dist = list(accumulate(self.probability_dist))
+
         for i in range(generation_limit):
-            self.population = self.get_best_organisms()
+            self.get_best_organisms()
 
             print(
-                f'Best Fitness in generation {i} -> {self.population[0].fitness_value}')
-            self.log_best_fitness[i] = self.population[0].fitness_value
+                f'Best Fitness in generation {i} -> {self.population[0].fitness_value}, {self.population[0]}'
+                )
+            self.log_best_fitness[i] = (self.population[0].fitness_value,self.population[0])
             if self.high_fitness_best:
                 if self.population[0].fitness_value >= fitness_limit:
                     break

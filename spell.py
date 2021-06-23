@@ -1,6 +1,6 @@
 from genetics import Organism, Population, Genome
 
-TARGET = "Hello World"
+TARGET = "hello world"
 
 
 def fitness_func(genome: Genome) -> int:
@@ -8,12 +8,13 @@ def fitness_func(genome: Genome) -> int:
     for curr_g, curr_t in zip(genome, TARGET):
         if curr_g != curr_t:
             fitness += 1
+        # fitness += (ord(curr_g) - ord(curr_t))**2
 
     return fitness
 
 
 population = Population(
-    size=1000,
+    size=100,
     genome_length=len(TARGET),
     fitness_func=fitness_func,
     high_fitness_best = False
@@ -21,8 +22,8 @@ population = Population(
 
 population, total_gen, history = population.run_evolution(
     fitness_limit = 0,
-    generation_limit = 500,
-    select_top_k_percent_for_next_gen = 0.15,
+    generation_limit = 100,
+    select_top_k_percent_for_next_gen = 0.1,
     
     
 

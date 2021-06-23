@@ -1,3 +1,4 @@
-### Knapsack Genetic Solution
+### Genetic Algorithm
 
-Solving knapsack problem using genetic algorithm
+Solving knapsack problem and word match using genetic algorithm. 
+It also works as generic template for applying genetic algorithm for your task.

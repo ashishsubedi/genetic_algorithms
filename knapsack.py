@@ -1,4 +1,4 @@
-import genes
+import knapsack_genes as genes
 from collections import namedtuple
 from functools import partial
 

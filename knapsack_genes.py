@@ -95,7 +95,7 @@ def run_evolution(
             break
     
     log_best_fitness :Dict[int,int] = {}
- 
+
 
     for i in range(generation_limit):
         population.sort(reverse=True,key=lambda genome:fitness_func(genome))

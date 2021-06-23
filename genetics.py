@@ -8,7 +8,8 @@ from typing import Dict, List, Optional, Tuple
 import genes
 from genes import FitnessFunc, mutation, run_evolution
 
-Genes = '''abcdefghijklmnopqrstuvwxyz '''
+Genes = '''abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP
+QRSTUVWXYZ 1234567890, .-;:_!"#%&/()=?@${[]}'''
 
 Genome = List[str]
 FitnessFunc = Callable[[Genome], int]

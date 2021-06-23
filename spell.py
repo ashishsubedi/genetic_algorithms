@@ -1,28 +1,28 @@
 from genetics import Organism, Population, Genome
 
-TARGET = "hello world"
+TARGET = "Hello World!!!"
 
 
 def fitness_func(genome: Genome) -> int:
     fitness = 0
     for curr_g, curr_t in zip(genome, TARGET):
-        if curr_g != curr_t:
+        if curr_g == curr_t:
             fitness += 1
-        # fitness += (ord(curr_g) - ord(curr_t))**2
 
     return fitness
 
 
 population = Population(
-    size=100,
+    size=500,
     genome_length=len(TARGET),
     fitness_func=fitness_func,
-    high_fitness_best = False
+    high_fitness_best = True
 )
 
 population, total_gen, history = population.run_evolution(
-    fitness_limit = 0,
-    generation_limit = 100,
+    # fitness_limit = 0,
+    fitness_limit = len(TARGET),
+    generation_limit = 300,
     select_top_k_percent_for_next_gen = 0.1,
     
     
